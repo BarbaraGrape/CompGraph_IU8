@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+<head>
+	<title>Lab 4</title>
+	<meta charset="UTF-8">
+	<script src = "../util/bresenhamLine.js"></script>
+	<script src = "../util/rectClip.js"></script>
+	<script src = "../util/util.js"></script>
+</head>
+<body>
+	<p>Отсечение отрезков</p>
+	<p>Выберите "видимую" область</p>
+	<center><canvas id="Clipping" width="400" height="400" style="border:2px solid #000000;">
+		<script>
+		function makeRandomLines(canvas, n)
+		{
+			var ctx = canvas.getContext("2d");
+			var w = canvas.width;
+			var h = canvas.height;
+
+			var lines = [];
+			for (var i = 0; i < n; ++i)
+				lines.push({x0: randInt(0, w), y0: randInt(0, h), x1: randInt(0, w), y1: randInt(0, h)});
+			return lines;
+		}
+		function drawLines(ctx, lines)
+		{
+			for (var i = 0; i < lines.length; ++i)
+				bresLine(ctx, lines[i].x0, lines[i].y0, lines[i].x1, lines[i].y1);
+		}
+
+		function initClipCanvas()
+		{
+			var canvas = document.getElementById("Clipping");
+			var ctx = canvas.getContext("2d");
+			var lines = makeRandomLines(canvas, 80);
+			ctx.fillStyle = "#000000";
+			drawLines(ctx, lines);
+			 
+			var rectW2 = 25;
+			var rectH2 = 15;
+
+			function onMove()
+			{
+				var x = event.offsetX;
+				var y = event.offsetY;
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+				var rect = [x - rectW2, y - rectH2, x + rectW2, y + rectW2];
+				var newLines = rectClip(rect, lines);
+
+				ctx.fillStyle = "#000000";
+				drawLines(ctx, newLines);
+
+				ctx.fillStyle = "#00FF00";
+				drawRect(ctx, rect);
+			}
+
+			canvas.addEventListener("mousemove", onMove);
+
+		}
+		initClipCanvas();
+		</script>
+	</canvas></center>
+</body>
+</html>

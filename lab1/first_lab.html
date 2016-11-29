@@ -1,0 +1,75 @@
+<!doctype html>
+<html>
+<head>
+	<title>Lab 1</title>
+	<meta charset="UTF-8">
+	<script src = "../util/bresenhamLine.js"></script>
+	<script src = "../util/bresenhamCircle.js"></script>
+</head>
+<body>
+	<p>Рисование линий. Линия строится по двум точкам. Первая - точка, куда указывала мышь при нажатии. Вторая при опускании.</p>
+	<center><canvas id="BrezLine" width="400" height="400" style="border:2px solid #000000;">
+		<script>
+			var brezLineCanvas = document.getElementById("BrezLine");
+			function createMouseEvent()
+			{
+				var ctx = brezLineCanvas.getContext("2d");
+				
+				var xD = null, yD = null;
+				function down()
+				{
+					if (event.button != 0)
+						return;
+					xD = event.offsetX;
+					yD = event.offsetY;
+				}
+				function up()
+				{
+					var xU = event.offsetX;
+					var yU = event.offsetY;
+					bresLine(ctx, xD, yD, xU, yU);
+				}
+				return { onDown: down, onUp: up };
+			}
+			var mouseEvent = createMouseEvent();
+			brezLineCanvas.addEventListener("mousedown", mouseEvent.onDown);
+			brezLineCanvas.addEventListener("mouseup", mouseEvent.onUp);
+		</script>
+	</canvas></center>
+	
+	<p>Рисование окружностей. Аналогично</p>
+	<center><canvas id="BrezCircle" width="400" height="400" style="border:2px solid #000000;">
+		<script>
+			var brezCircleCanvas = document.getElementById("BrezCircle");
+
+			function createMouseEvent()
+			{
+				var ctx = brezCircleCanvas.getContext("2d");
+				
+				var xD = null, yD = null;
+				function down()
+				{
+					if (event.button != 0)
+						return;
+					xD = event.offsetX;
+					yD = event.offsetY;
+				}
+				function up()
+				{
+					var xU = event.offsetX;
+					var yU = event.offsetY;
+					var R = Math.sqrt(Math.pow(xU-xD,2) + Math.pow(yU-yD,2));
+					bresCircle(ctx, xD, yD, R);
+				}
+				return { onDown: down, onUp: up };
+			}
+
+			mouseEvent = createMouseEvent();
+			brezCircleCanvas.addEventListener("mousedown", mouseEvent.onDown);
+			brezCircleCanvas.addEventListener("mouseup", mouseEvent.onUp);
+		</script>
+	</canvas></center>
+</body>
+</html>
+
+

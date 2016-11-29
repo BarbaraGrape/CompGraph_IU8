@@ -1,0 +1,86 @@
+<!doctype html>
+<html>
+<head>
+	<title>Lab 3</title>
+	<meta charset="UTF-8">
+	<script src = "../util/bresenhamLine.js"></script>
+	<script src = "../util/bresenhamCircle.js"></script>
+	<script src = "../util/bezierCurve.js"></script>
+	<script src = "../util/util.js"></script>
+</head>
+<body>
+	<p>Построение кривой безье</p>
+	<p>Для окончания построения нажмите на любую точку</p>
+	<center><canvas id="Bezier" width="400" height="400" style="border:2px solid #000000;">
+		<script>
+		function initCanvasBezier()
+		{
+			var canvas = document.getElementById("Bezier");
+			var ctx = canvas.getContext("2d");
+
+			var points = [];
+
+			function createMouseEvent()
+			{
+				var R = 5;
+				function getOuterCircle(x, y)
+				{
+					for (var i = 0; i < points.length; ++i)
+						if (dist(points[i].x, points[i].y, x, y) < 2*R)
+							return i;
+					return null;
+				}
+
+				function reset()
+				{
+					canvas.removeEventListener("click",reset);
+					points = [];
+					ctx.clearRect(0, 0, canvas.width, canvas.height);
+					canvas.addEventListener("click", click);
+				}
+				function click()
+				{
+					if (event.button != 0)
+						return;
+
+					x = event.offsetX;
+					y = event.offsetY;
+					
+					var index = getOuterCircle(x, y);	
+					if (index != null)
+					{
+						if (points.length > 1)
+						{
+							ctx.fillStyle = "#000000";
+							bezierCurve(ctx, points);
+							canvas.removeEventListener("click",click);
+							canvas.addEventListener("click",reset);
+							return;
+						}
+						else
+							return
+					}
+					
+					ctx.fillStyle = "#FF0000";
+					bresCircle(ctx, x, y, R);
+					pushPoint(points, x, y);
+
+
+					if (points.length >= 2)
+					{
+						var p = points.length - 2;
+						ctx.fillStyle = "#00FF00";
+						bresLine(ctx, points[p].x, points[p].y, x, y);
+						return;
+					}
+				}
+				return { onClick: click };
+			}
+			var mouseEvent = createMouseEvent();
+			canvas.addEventListener("click", mouseEvent.onClick);
+		}
+		initCanvasBezier();
+		</script>
+	</canvas></center>
+</body>
+</html>

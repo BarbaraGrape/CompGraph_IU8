@@ -1,0 +1,155 @@
+<!doctype html>
+<html>
+<head>
+	<title>Lab 2</title>
+	<meta charset="UTF-8">
+	<script src = "../util/bresenhamLine.js"></script>
+	<script src = "../util/bresenhamCircle.js"></script>
+	<script src = "../util/polygonFill.js"></script>
+	<script src = "../util/fillRegion.js"></script>
+	<script src = "../util/util.js"></script>
+</head>
+<body>
+	<p>Закрашивание многоугольников. Метод У-буффера.</p>
+	<center><canvas id="PolygonFill" width="400" height="400" style="border:2px solid #000000;">
+		<script>
+		function initCanvasPolygonFill()
+		{
+			var canvas = document.getElementById("PolygonFill");
+			var ctx = canvas.getContext("2d");
+			var polygon = [];
+
+
+			function createMouseEvent()
+			{
+				var R = 5;
+				
+				var x0 = null, y0 = null;
+				var xP = null, yP = null;
+				function reset()
+				{
+					canvas.removeEventListener("click",reset);
+					polygon = [];
+					x0 = null, y0 = null;
+					xP = null, yP = null;
+					ctx.clearRect(0, 0, canvas.width, canvas.height);
+					canvas.addEventListener("click", click);
+				}
+				function click()
+				{
+					if (event.button != 0)
+						return;
+					if (x0 === null)
+					{ xP = x0 = event.offsetX;
+						yP = y0 = event.offsetY;
+
+						addPoint2Polygon(polygon, x0, y0);
+
+						ctx.fillStyle = "#FF0000";
+						bresCircle(ctx, x0, y0, R);
+						return;
+					}
+
+					x1 = event.offsetX;
+					y1 = event.offsetY;
+
+					if (dist(x1,y1,x0,y0) < R )
+					{
+						if (polygon.length >= 3)
+						{
+							canvas.removeEventListener("click",click);
+
+							addPoint2Polygon(polygon, x0, y0);
+							ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+							rect = findFramingRect(polygon);
+							ctx.fillStyle = "#00FF00";
+							drawRect(ctx, rect);
+
+							ctx.fillStyle = "#000000";
+							polygonDraw(ctx, polygon);
+
+							ctx.fillStyle = "#0000FF";
+							polygonFill(ctx,polygon);
+							canvas.addEventListener("click",reset);
+
+						}
+						return;
+					}
+
+					ctx.fillStyle = "#000000";
+					bresLine(ctx, xP, yP, x1, y1);
+					xP = x1; yP = y1;
+					addPoint2Polygon(polygon, xP, yP);
+				}
+				return { onClick: click };
+			}
+			var mouseEvent = createMouseEvent();
+			canvas.addEventListener("click", mouseEvent.onClick);
+		}
+		initCanvasPolygonFill();
+		</script>
+	</canvas></center>
+	<p>Закрашивание произвольных областей</p>
+	<center><canvas id="VariFill" width="400" height="400" style="border:2px solid #000000;">
+		<script>
+		function drawPicture(canvas)
+		{
+			var ctx = canvas.getContext("2d");
+			var w = canvas.width;
+			var h = canvas.height;
+
+			var xn = 9;
+			var yn = 19;
+
+			var dx = Math.round(w / (xn + 1));
+			var dx2 = Math.round(dx/2);
+			var dy = Math.round(h / (yn + 1));
+			
+			for (y = dy; y < h; y += 2*dy)
+				for (x = 0; x < w; x += dx)
+				{
+					bresLine(ctx,x, y - dy, x+dx2, y);
+					bresLine(ctx,x, y + dy, x+dx2, y);
+					bresLine(ctx,x + dx, y - dy, x+dx2, y);
+					bresLine(ctx,x + dx, y + dy, x+dx2, y);
+				}
+			function drawCircleRec(ctx, x, y, w, d)
+			{
+				var R = w/2;
+				bresCircle(ctx, x+R, y+R, R);
+				
+				var dw = w / 2;
+				d--;
+				if (d == 0)
+					return;
+				drawCircleRec(ctx, x, y, R, d);
+				drawCircleRec(ctx, x+dw, y, R, d);
+				drawCircleRec(ctx, x, y+dw, R, d);
+				drawCircleRec(ctx, x+dw, y+dw, R, d);
+			}
+				drawCircleRec(ctx, 0, 0, w, 3);
+		}
+		function initVariFill()
+		{
+			var canvas = document.getElementById("VariFill");
+			var ctx = canvas.getContext("2d");
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			drawPicture(canvas);
+			function onClick()
+			{
+				if (event.button != 0)
+					return;
+
+				ctx.fillStyle = "#00FF00";
+				fillRegion(ctx, event.offsetX, event.offsetY, canvas.width, canvas.height);
+			}
+
+			canvas.addEventListener("click", onClick);
+
+		}
+		initVariFill();
+		</script>
+	</canvas></center>
+</body>
+</html>

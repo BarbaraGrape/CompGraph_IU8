@@ -1,0 +1,77 @@
+<!doctype html>
+<html>
+<head>
+	<title>Lab 5</title>
+	<meta charset="UTF-8">
+	<script src = "../util/bresenhamLine.js"></script>
+	<script src = "../util/bezierCurve.js"></script>
+	<script src = "../util/util.js"></script>
+	<script src = "../util/matrix.js"></script>
+</head>
+<body>
+	<p>Поворот кривой безье вокруг оси</p>
+	<p>Выберите ось вращения<p>
+	<center><canvas id="Bezier" width="400" height="400" style="border:2px solid #000000;">
+		<script>
+		function initCanvasBezier()
+		{
+			var canvas = document.getElementById("Bezier");
+			var ctx = canvas.getContext("2d");
+
+			var points = [{x: 50, y: 20}, {x:100, y:100}, {x:200, y:40}, {x:150, y:80}];
+			var axis = {x: 200, y: 200};
+			var angle = 0.05;
+
+			function rotate(pm, a)
+			{
+				function rotatePoint(point)
+				{
+					var p = new Point(point.x, point.y);
+					var m1 = new RotateMatrix(a);
+					var m2 = new MoveMatrix(-pm.x, -pm.y);
+					var m3 = new MoveMatrix(pm.x, pm.y);
+					var m = Matrix.mul(m3,Matrix.mul(m1,m2));
+
+					p.apply(m);
+					point.x = p.x;
+					point.y = p.y;
+				}
+				for (var i = 0; i < points.length; ++i)
+					rotatePoint(points[i]);
+			}
+
+			function createMouseEvent()
+			{
+
+				function reset()
+				{
+					canvas.removeEventListener("click",reset);
+					points = [];
+					ctx.clearRect(0, 0, canvas.width, canvas.height);
+					canvas.addEventListener("click", click);
+				}
+				function click()
+				{
+					if (event.button != 0)
+						return;
+
+					axis.x = event.offsetX;
+					axis.y = event.offsetY;
+				}
+				return { onClick: click };
+			}
+			function redraw()
+			{
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+				bezierCurve(ctx, points);
+			}
+
+			setInterval(function() { rotate(axis, angle); redraw(); }, 33);
+			var mouseEvent = createMouseEvent();
+			canvas.addEventListener("click", mouseEvent.onClick);
+		}
+		initCanvasBezier();
+		</script>
+	</canvas></center>
+</body>
+</html>
