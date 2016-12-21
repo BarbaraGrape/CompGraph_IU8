@@ -1,0 +1,136 @@
+<!doctype html>
+<html>
+<head>
+	<title>Lab 7</title>
+	<meta charset="UTF-8">
+	<script src = "../util/drawer.js"></script>
+</head>
+<body>
+	<p>Свет</p>
+	<center><canvas id="Canvas" width="300" height="300" style="border:3px solid #000000;">
+		<script>
+		(function()
+		{
+
+		let canvas = document.getElementById("Canvas");	
+		let drawer = new Drawer(canvas);
+
+		function getRotateMatrix(x, y)
+		{
+			let m1 = Drawer.Matrix.Move(-150, -150, -250);
+			let m2 = Drawer.Matrix.RotateX(x);
+			let m3 = Drawer.Matrix.RotateY(y);
+			let m4 = Drawer.Matrix.Move(150, 150, 250);
+			return Drawer.Matrix.mul(m4,Drawer.Matrix.mul(m2, Drawer.Matrix.mul(m3,m1)));
+		}
+
+		let topCenter 	= new Drawer.Point(150, 50, 250);
+		let midCenter 	= new Drawer.Point(150, 150, 250);
+		let botCenter 	= new Drawer.Point(150, 250, 250);
+		let topR	= 25;
+		let midR	= 90;
+		let nOfSectors	= 5; 
+		let nOfCurves	= nOfSectors+1; 
+		let da 		= Math.PI / nOfSectors;
+		let dt 		= 0.1; 
+		let color1	= "#000000";
+		let color2	= "#0000FF";
+		let angleOff 	= 0;
+		let time 	= 0
+		let dTime 	= 0.01
+		let transMatrix = getRotateMatrix(0);
+		drawer.light(new Drawer.Point(1,.7,1), 150);
+		drawer.lightOn();
+
+		function roundAllPoints(points)
+		{
+			for (let i = 0; i < points.length; ++i)
+				points[i] = points[i].round();
+		}
+		function getPointCircleXZ(center, a, R)
+		{
+			a += 3*Math.PI / 2;
+			let dx = R*Math.sin(a);
+			let dz = R*Math.cos(a);
+			return new Drawer.Point(center.x + dx, center.y, center.z + dz);
+		}
+		function getPointsOfSectorCurve(a)
+		{
+			let topP = getPointCircleXZ(topCenter, a, topR);				
+			let midP = getPointCircleXZ(midCenter, a, midR*2);				
+			let botP = getPointCircleXZ(botCenter, a, topR);				
+
+			topP = topP.appTransform(transMatrix);
+			midP = midP.appTransform(transMatrix);
+			botP = botP.appTransform(transMatrix);
+			return [topP, midP, botP];
+		}
+		function make3Polygon(dotL, dotR, color)
+		{
+			drawer.fillColor = color;
+
+			for (let i  = 1; i < dotL.length; ++i)
+			{
+				drawer.polygon3(dotL[i-1], dotL[i], dotR[i-1]);
+				drawer.polygon3(dotR[i-1], dotL[i], dotR[i]);
+			}
+		}
+		function drawPolygons()
+		{
+			let polygons = []; 
+			let curvePoints = [];
+
+			for (let a = 0; a <= Math.PI * 2; a+=da)
+				curvePoints.push(getPointsOfSectorCurve(a));
+			
+			let upLeftDots = [];
+			Drawer.Misc.bezier2Lines(curvePoints[0], upLeftDots, dt, 0, 0.5); // up down
+			let downLeftDots = [];
+			Drawer.Misc.bezier2Lines(curvePoints[0], downLeftDots, dt, 0.5, 1); // up down
+
+			drawer.color = "TRANSPARENT";
+			for (let i = 1; i < curvePoints.length; ++i)
+			{
+				let upRightDots = [];
+				Drawer.Misc.bezier2Lines(curvePoints[i]  , upRightDots, dt, 0, 0.5);
+				make3Polygon(upLeftDots, upRightDots, color1);
+				upLeftDots = upRightDots;
+
+				let downRightDots = [];
+				Drawer.Misc.bezier2Lines(curvePoints[i]  , downRightDots, dt, 0.5, 1);
+				make3Polygon(downLeftDots, downRightDots, color2);
+				downLeftDots = downRightDots;
+
+				[color1, color2] = [color2, color1];
+			}
+			let upCenter = topCenter.appTransform(transMatrix).round();
+			let downCenter = botCenter.appTransform(transMatrix).round();
+			for (let i = 1; i < curvePoints.length; ++i)
+			{
+				drawer.fillColor = color1;
+				drawer.polygon3(upCenter, curvePoints[i-1][0].round(), curvePoints[i][0].round());
+
+				drawer.fillColor = color2;
+				drawer.polygon3(downCenter, curvePoints[i][2].round(), curvePoints[i-1][2].round());
+				[color1, color2] = [color2, color1];
+			}
+
+		}
+
+		function update()
+		{
+			time += dTime;
+			transMatrix = getRotateMatrix(0.7, -time/2);
+			drawer.light(new Drawer.Point(Math.sin(3*time),.8,Math.cos(3*time)), 150);
+
+			drawPolygons();
+			drawer.redraw();
+		}
+
+
+		setInterval(update,30);
+		})()
+		</script>
+	</canvas></center>
+</body>
+</html>

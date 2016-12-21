@@ -1,0 +1,26 @@
+<!doctype html>
+<html>
+<head>
+	<title>Lab 6</title>
+	<meta charset="UTF-8">
+	<script src = "../util/drawer.js"></script>
+</head>
+<body>
+	<p>Пространственные треугольники.</p>
+	<center><canvas id="lab6Canvas" width="400" height="400" style="border:2px solid #000000;">
+		<script>
+		(function() {
+			let canvas = document.getElementById("lab6Canvas");	
+			let drawer = new Drawer(canvas);
+			drawer.fillColor = "#0000FF";	
+			drawer.polygon3(new Drawer.Point(150, 350, 45), new Drawer.Point(100, 100, 0), new Drawer.Point(300,300, 300));
+			drawer.fillColor = "#00000";	
+			drawer.polygon3(new Drawer.Point(300, 150, 0),new Drawer.Point(300, 300, 250),new Drawer.Point(150, 300, 300));
+			drawer.redraw();
+		})();
+		</script>
+	</canvas></center>
+</body>
+</html>
+
+
